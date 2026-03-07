@@ -290,10 +290,11 @@
 
     <script>
         const music = document.getElementById('anniversaryMusic');
-        const defaultVolume = 0.2;
+        const defaultVolume = 0.18;
         const dimmedVolume = 0.05;
         
         music.volume = defaultVolume;
+        music.playbackRate = 1.15; // 15% faster playback
         let numOfPapers = 11;
         let isLocked = false;
 
@@ -444,4 +445,5 @@
         updateLoveCounter();
     </script>
 </body>
+
 </html>
