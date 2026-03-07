@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Story - 3 Years ❤️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1a0b2e 0%, #4b1d52 50%, #852d53 100%);
+            font-family: 'Montserrat', sans-serif; color: white;
+            display: flex; flex-direction: column; align-items: center;
+            transition: background 2s ease;
+        }
+
+        /* --- Overlays --- */
+        #love-gate, #restart-overlay, #final-message-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(26, 11, 46, 0.98);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 2000; transition: opacity 1.5s ease, visibility 1.5s;
+        }
+        #restart-overlay, #final-message-overlay { opacity: 0; visibility: hidden; }
+        #restart-overlay.show, #final-message-overlay.show { opacity: 1; visibility: visible; }
+        
+        .gate-content {
+            text-align: center; padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 80%;
+        }
+        .gate-content h2 { font-family: 'Dancing Script'; font-size: 2.5rem; margin-bottom: 25px; }
+
+        .typewriter-text {
+            display: inline-block;
+            overflow: hidden;
+            border-right: 2px solid #ff4d6d;
+            white-space: pre-wrap;
+            margin: 0 auto;
+            letter-spacing: .10em;
+            max-width: 500px;
+            text-align: left;
+        }
+
+        .btn-love {
+            padding: 12px 35px; font-size: 1.2rem; border: none;
+            border-radius: 50px; cursor: pointer; font-family: 'Montserrat';
+            transition: transform 0.3s, background 0.3s; margin: 10px;
+        }
+        .btn-yes { background: #ff4d6d; color: white; }
+        .btn-yes:hover { transform: scale(1.1); background: #ff758f; }
+        .hidden-gate { opacity: 0 !important; visibility: hidden !important; pointer-events: none; }
+        
+        /* --- Header --- */
+        .header-message {
+            text-align: center; padding: 15px; margin-top: 2vh;
+            background: rgba(255, 255, 255, 0.05); border-radius: 15px;
+            backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 80%; max-width: 600px; z-index: 1000;
+            transition: opacity 0.5s;
+        }
+
+        /* --- Book Styling --- */
+        .scene {
+            width: 100%; flex: 1; display: flex; justify-content: center;
+            align-items: center; perspective: 2500px;
+            transition: opacity 1.5s ease-out, transform 1s;
+        }
+        .book {
+            width: 400px; height: 550px; position: relative;
+            transform-style: preserve-3d; transition: transform 1s;
+            transform: translateX(0) scale(1);
+        }
+        .book.open { transform: translateX(200px) scale(1.0); }
+        .fade-out { opacity: 0 !important; pointer-events: none; }
+        
+        .paper {
+            position: absolute; width: 100%; height: 100%; top: 0; left: 0;
+            transform-origin: left; transition: transform 1s cubic-bezier(0.645, 0.045, 0.355, 1);
+            transform-style: preserve-3d; cursor: pointer;
+        }
+        .flipped { transform: rotateY(-180deg); }
+        
+        .front, .back {
+            position: absolute; width: 100%; height: 100%;
+            backface-visibility: hidden; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; padding: 30px;
+            box-sizing: border-box; border-radius: 0 15px 15px 0;
+            box-shadow: inset 3px 0px 20px rgba(0,0,0,0.1);
+            background: #fffcf5 !important; color: #4b1d52;
+            text-align: center;
+        }
+        .back { transform: rotateY(180deg); border-radius: 15px 0 0 15px; z-index: 1; }
+        
+        .flower { position: absolute; width: 40px; height: auto; opacity: 0.6; pointer-events: none; font-size: 2rem; }
+        .f-top { top: 10px; right: 10px; }
+        .f-bottom { bottom: 10px; left: 10px; }
+
+        .cover-front { background: #852d53 !important; color: white !important; border-left: 10px solid #661a3e; }
+        .cover-back { background: #852d53 !important; color: white !important; border-right: 10px solid #661a3e; }
+
+        .love-timer-container {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 10px; margin: 20px 0; width: 95%;
+        }
+        .timer-title { font-family: 'Dancing Script', cursive; font-size: 1.4rem; color: #ffffff; }
+        .timer-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; }
+        .timer-box {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px; padding: 10px 5px; text-align: center;
+        }
+        .timer-box.big { grid-column: span 3; }
+        .timer-val { display: block; font-size: 1.2rem; font-weight: 700; color: white; }
+        .timer-label { display: block; font-size: 0.6rem; text-transform: uppercase; color: white; opacity: 0.9; }
+
+        img {
+            width: 85%; height: auto; border: 12px solid white;
+            border-bottom: 40px solid white;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+            transform: rotate(-2deg); border-radius: 2px;
+        }
+        
+        video {
+            width: 90%; max-height: 60%; object-fit: cover;
+            border: 8px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            margin-bottom: 15px; background: #000;
+        }
+
+        .text-page { font-family: 'Dancing Script', cursive; font-size: 1.6rem; text-align: center; line-height: 1.4; }
+        .back p, .front p { opacity: 0; transition: opacity 0.8s ease; margin-top: 10px; }
+        .flipped .back p, .paper:not(.flipped) .front p { opacity: 1; }
+
+        .heart { position: absolute; color: rgba(255, 105, 135, 0.5); pointer-events: none; z-index: 0; }
+        @keyframes floatUp {
+            0% { transform: translateY(110vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-20vh) rotate(360deg); opacity: 0; }
+        }
+
+        @media screen and (max-width: 600px) {
+            .book { width: 300px; height: 450px; }
+            .book.open { transform: translateX(150px) scale(0.9); }
+            .text-page { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="love-gate">
+        <div class="gate-content">
+            <h2>But first... do you really love me?</h2>
+            <button class="btn-love btn-yes" onclick="unlockBook()">Yes, I do! ❤️</button>
+        </div>
+    </div>
+
+    <div id="final-message-overlay">
+        <div class="gate-content">
+            <h2 style="font-size: 2.8rem; font-family: 'Dancing Script';">To My Everything,</h2>
+            <h3 style="font-size: 1.8rem; margin-top: -15px; color: #ff4d6d;">Nurul Syakirah Izzani</h3>
+            <div class="typewriter-text" id="typewriter-container"></div>
+            <br>
+            <button class="btn-love btn-yes" id="final-continue-btn" style="display:none; margin-top: 20px;" onclick="showRestart()">Continue ❤️</button>
+        </div>
+    </div>
+
+    <div id="restart-overlay">
+        <div class="gate-content">
+            <h2>The End of Our Chapter...</h2>
+            <p>I’ll always hold onto the memories of us.</p>
+            <button class="btn-love btn-yes" onclick="resetBook()">Watch Our Story One More Time ❤️</button>
+        </div>
+    </div>
+
+    <div class="header-message" id="header-msg">
+        <h1 style="font-family: 'Dancing Script'; margin:0;">Happy 3rd Anniversary ❤️</h1>
+        <p style="margin:5px 0 0 0; font-size: 0.9rem;">Click the pages to flip through our memories</p>
+    </div>
+
+    <div class="scene" id="main-scene">
+        <div class="book" id="book">
+            
+            <div class="paper" id="p1" style="z-index: 11;" onclick="flipPage(1)">
+                <div class="front cover-front">
+                    <h2 style="font-family: 'Montserrat'; letter-spacing: 5px; font-size: 1.8rem; font-weight: 700;">OUR STORY</h2>
+                    <div class="love-timer-container">
+                        <span class="timer-title">Time spent together...</span>
+                        <div class="timer-grid">
+                            <div class="timer-box big">
+                                <span class="timer-val" id="count-years-days">0 Years, 0 Days</span>
+                                <span class="timer-label">Since Feb 10, 2023</span>
+                            </div>
+                            <div class="timer-box"><span class="timer-val" id="count-hours">00</span><span class="timer-label">Hours</span></div>
+                            <div class="timer-box"><span class="timer-val" id="count-mins">00</span><span class="timer-label">Mins</span></div>
+                            <div class="timer-box"><span class="timer-val" id="count-secs">00</span><span class="timer-label">Secs</span></div>
+                        </div>
+                    </div>
+                    <p style="font-family: 'Dancing Script'; font-size: 1.6rem;">3 Years of Love</p>
+                    <span style="font-size: 40px;">📖</span>
+                </div>
+                <div class="back text-page">
+                    <span class="flower f-top">🌸</span>
+                    <p>It all started 3 years ago... The moment our eyes met, something in my heart just clicked.</p>
+                </div>
+            </div>
+
+            <div class="paper" id="p2" style="z-index: 10;" onclick="flipPage(2)">
+                <div class="front"><img src="img/photo_6150036780535713690_y.jpg" alt="Memory 1"></div>
+                <div class="back text-page">
+                    <span class="flower f-bottom">🌿</span>
+                    <p>Every laugh we shared became a memory I hold close.</p>
+                </div>
+            </div>
+
+            <div class="paper" id="p3" style="z-index: 9;" onclick="flipPage(3)">
+                <div class="front">
+                    <video class="story-video" preload="auto" playsinline>
+                        <source src="document_6152288579889404578.mp4" type="video/mp4">
+                    </video>
+                    <p class="text-page" style="font-size: 1.2rem;">I realized I wanted to be a permanent part of your life.</p>
+                </div>
+                <div class="back text-page"><p>Every step forward was better because you were beside me. Looking back, I realize that the path didn't matter as much as the person walking it with me.</p></div>
+            </div>
+
+            <div class="paper" id="p4" style="z-index: 8;" onclick="flipPage(4)">
+                <div class="front"><img src="img/photo_6152288580349398173_y.jpg" alt="Memory 4"></div>
+                <div class="back text-page"><p>They say time flies when you’re having fun, but with you, time flies because I’ve finally found where I belong. These three years have gone by in the blink of an eye, and if I could, I’d hit pause on every single moment just to stay in your presence a little longer.</p></div>
+            </div>
+
+            <div class="paper" id="p5" style="z-index: 7;" onclick="flipPage(5)">
+                <div class="front"><img src="img/photo_6150036780535713692_y.jpg" alt="Memory 5"></div>
+                <div class="back text-page"><p>Every moment feels like a dream I never want to wake up from.</p></div>
+            </div>
+
+            <div class="paper" id="p6" style="z-index: 6;" onclick="flipPage(6)">
+                <div class="front"><img src="img/photo_6152288580349398174_x.jpg" alt="Memory 6"></div>
+                <div class="back text-page"><p>I love planning surprises just to see that look on your face. Seeing you light up with a genuine smile is—and always will be—my favorite view in the world. ❤️</p></div>
+            </div>
+
+            <div class="paper" id="p7" style="z-index: 5;" onclick="flipPage(7)">
+                <div class="front">
+                    <img src="img/photo_6150036780535713689_y.jpg" alt="Memory 7">
+                </div>
+                <div class="back text-page"><p>Your smile is the only 'thank you' I ever need.</p></div>
+            </div>
+
+            <div class="paper" id="p8" style="z-index: 4;" onclick="flipPage(8)">
+                <div class="front text-page"><p>You are my best friend and my home.</p></div>
+                <div class="back">
+                    <img src="img/photo_6150036780535713688_x.jpg" alt="Memory 3">
+                    <p class="text-page" style="font-size: 1.1rem;">In the symphony of life, our hearts find the sweetest melody.</p></div>
+            </div>
+
+            <div class="paper" id="p9" style="z-index: 3;" onclick="flipPage(9)">
+                <div class="front">
+                    <video class="story-video" preload="auto" playsinline>
+                        <source src="IMG_5655.mp4" type="video/mp4">
+                    </video>
+                    <p class="text-page" style="font-size: 1.2rem;">Your happiness is my happiness. Always.</p>
+                </div>
+                <div class="back text-page"><p>I’ve always thought light colors suit you best—they bring out your softness and make you look even more radiant.</p></div>
+            </div>
+
+            <div class="paper" id="p10" style="z-index: 2;" onclick="flipPage(10)">
+                <div class="front text-page"><img src="img/photo_6152288580349398530_y.jpg" alt="Memory 2"></div>
+                <div class="back text-page"><p>I love that with you, We don’t always have to act like an adult who has everything figured out. We can be silly, laugh at random things, and just enjoy the moment without worrying about being serious all the time.</p></div>
+            </div>
+
+            <div class="paper" id="p11" style="z-index: 1;" onclick="flipPage(11)">
+                <div class="front text-page">
+                    <video class="story-video" preload="auto" playsinline>
+                        <source src="IMG_2240.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="back cover-back">
+                    <h2 style="font-family: 'Montserrat'; font-size: 1.8rem; letter-spacing: 3px; font-weight: 700;">THANK YOU FOR <br> CHOOSING ME</h2>
+                    <span style="font-size: 60px;">❤️</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <audio id="anniversaryMusic" loop>
+        <source src="James Arthur - Say You Won't Let Go (Lyrics) - (320 Kbps).mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const music = document.getElementById('anniversaryMusic');
+        const defaultVolume = 0.2;
+        const dimmedVolume = 0.05;
+        
+        music.volume = defaultVolume;
+        let numOfPapers = 11;
+        let isLocked = false;
+
+        const finalMessage = "These three years have been the most meaningful years of my life. I know things are different now, and my heart is heavy as I write this. Thank you for your patience, your kindness, and for the honor of letting me love you.\n\nIf this is where our story ends, please know that I cherished every page. But if there’s still a chance for us to write another chapter, I’m still here.";
+
+        function typeWriter(text, i, fnCallback) {
+            if (i < text.length) {
+                document.getElementById("typewriter-container").innerHTML = text.substring(0, i+1) +'<span aria-hidden="true">|</span>';
+                setTimeout(function() { typeWriter(text, i + 1, fnCallback) }, 40);
+            } else if (typeof fnCallback == 'function') {
+                setTimeout(fnCallback, 700);
+            }
+        }
+
+        function fadeMusic(targetVolume) {
+            let step = 0.01;
+            let interval = setInterval(() => {
+                if (music.volume < targetVolume) {
+                    music.volume = Math.min(targetVolume, music.volume + step);
+                } else {
+                    music.volume = Math.max(targetVolume, music.volume - step);
+                }
+                if (Math.abs(music.volume - targetVolume) < 0.01) clearInterval(interval);
+            }, 50);
+        }
+
+        function stopAllVideos() {
+            document.querySelectorAll('.story-video').forEach(v => { 
+                v.pause(); 
+                v.currentTime = 0; 
+            });
+            fadeMusic(defaultVolume);
+        }
+
+        function unlockBook() {
+            document.getElementById('love-gate').classList.add('hidden-gate');
+            music.play();
+        }
+
+        function flipPage(paperNum) {
+            if (isLocked) return;
+            stopAllVideos(); 
+            
+            const book = document.getElementById('book');
+            const paper = document.getElementById(`p${paperNum}`);
+            
+            if (paper.classList.contains('flipped')) {
+                paper.classList.remove('flipped');
+                paper.style.zIndex = (numOfPapers - paperNum) + 1;
+                if(paperNum === 1) book.classList.remove('open');
+            } else {
+                paper.classList.add('flipped');
+                paper.style.zIndex = 100 + paperNum;
+                if(paperNum === 1) book.classList.add('open');
+                
+                const nextPaperNum = paperNum + 1;
+                if (nextPaperNum <= numOfPapers) {
+                    const revealedPaper = document.getElementById(`p${nextPaperNum}`);
+                    const videoToPlay = revealedPaper.querySelector('.story-video');
+                    
+                    if (videoToPlay) { 
+                        fadeMusic(dimmedVolume); 
+                        // FIX: Explicitly unmute and set high volume
+                        videoToPlay.muted = false;
+                        videoToPlay.volume = 1.0; 
+                        
+                        // Play with catch to handle browser blocks
+                        let playPromise = videoToPlay.play();
+                        if (playPromise !== undefined) {
+                            playPromise.catch(error => {
+                                console.log("Autoplay with sound was prevented. User must interact again.");
+                                // Fallback: play muted if unmuted fails
+                                videoToPlay.muted = true;
+                                videoToPlay.play();
+                            });
+                        }
+                    }
+                }
+
+                if(paperNum === numOfPapers) {
+                    isLocked = true;
+                    setTimeout(() => {
+                        document.getElementById('main-scene').classList.add('fade-out');
+                        document.getElementById('header-msg').classList.add('fade-out');
+                        setTimeout(() => {
+                            document.getElementById('final-message-overlay').classList.add('show');
+                            typeWriter(finalMessage, 0, function(){
+                                document.getElementById('final-continue-btn').style.display = 'inline-block';
+                            });
+                        }, 1500);
+                    }, 2500);
+                }
+            }
+        }
+
+        function showRestart() {
+            document.getElementById('final-message-overlay').classList.remove('show');
+            setTimeout(() => { document.getElementById('restart-overlay').classList.add('show'); }, 500);
+        }
+
+        function resetBook() {
+            isLocked = false;
+            stopAllVideos();
+            music.currentTime = 0;
+            document.getElementById('typewriter-container').innerHTML = "";
+            document.getElementById('final-continue-btn').style.display = 'none';
+            document.getElementById('restart-overlay').classList.remove('show');
+            
+            for(let i = numOfPapers; i >= 1; i--) {
+                const paper = document.getElementById(`p${i}`);
+                paper.classList.remove('flipped');
+                paper.style.zIndex = (numOfPapers - i) + 1;
+            }
+            document.getElementById('book').classList.remove('open');
+            setTimeout(() => {
+                document.getElementById('main-scene').classList.remove('fade-out');
+                document.getElementById('header-msg').classList.remove('fade-out');
+            }, 800);
+        }
+
+        setInterval(() => {
+            const heart = document.createElement('div');
+            heart.classList.add('heart');
+            heart.innerHTML = '❤️';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.fontSize = (Math.random() * 20 + 10) + 'px';
+            heart.style.animation = `floatUp ${(Math.random() * 4 + 4)}s linear forwards`;
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 8000);
+        }, 600);
+
+        function updateLoveCounter() {
+            const startDate = new Date("February 10, 2023 00:00:00").getTime();
+            setInterval(() => {
+                const now = new Date().getTime();
+                const diff = now - startDate;
+                const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
+                const days = Math.floor((diff % (1000 * 60 * 60 * 24 * 365.25)) / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const secs = Math.floor((diff % (1000 * 60)) / 1000);
+                document.getElementById("count-years-days").innerText = `${years} Years, ${days} Days`;
+                document.getElementById("count-hours").innerText = hours.toString().padStart(2, '0');
+                document.getElementById("count-mins").innerText = mins.toString().padStart(2, '0');
+                document.getElementById("count-secs").innerText = secs.toString().padStart(2, '0');
+            }, 1000);
+        }
+        updateLoveCounter();
+    </script>
+</body>
+</html>
